@@ -40,3 +40,16 @@ def test_save_and_load_npz(tmp_path):
     builder2 = EmotionVectorBuilder()
     builder2.load(str(save_path))
     np.testing.assert_array_almost_equal(builder2.vectors["happy"], vec)
+
+def test_probe_accuracy_above_70_percent():
+    """Logistic probe on clearly separable data must exceed 70% CV accuracy."""
+    pos, neu = make_separable_data()
+    builder = EmotionVectorBuilder()
+    acc = builder.probe_accuracy(pos, neu)
+    assert acc > 0.70, f"Expected >70% accuracy, got {acc:.2%}"
+
+def test_logistic_probe_is_unit_norm():
+    pos, neu = make_separable_data()
+    builder = EmotionVectorBuilder()
+    vec = builder.logistic_probe(pos, neu)
+    assert abs(np.linalg.norm(vec) - 1.0) < 1e-6
